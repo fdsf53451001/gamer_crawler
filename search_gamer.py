@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 import os
 import tqdm
 
-from get_jina_parse import get_jina, save_crawler_data
+from get_jina_parse import crawler_pipeline
 
 headers = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
@@ -50,8 +50,9 @@ def search_and_save(topic_bsn, question):
         # result_title = result_title.replace('/', '_')
         # result_title = result_title.replace('\\', '_')
         # result_title = result_title.replace('?', '_')
-        jina_page = get_jina(result_link)
-        save_crawler_data(jina_page, f'result/{topic_bsn}_{question}/{i}.md')
+        crawler_pipeline(result_link, f'result/{topic_bsn}_{question}/{i}')
+        # jina_page = get_jina(result_link)
+        # save_crawler_data(jina_page, f'result/{topic_bsn}_{question}/{i}.md')
 
 if __name__ == '__main__':
     topic_bsn = '74934'
