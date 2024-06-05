@@ -2,6 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 import os
 import tqdm
+import threading
 
 from get_jina_parse import crawler_pipeline
 
@@ -9,7 +10,7 @@ headers = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
 }
 
-def search(topic_bsn, question):
+def search(topic_bsn, question, top_k=5):
     response = requests.get(f'https://forum.gamer.com.tw/search.php?bsn={topic_bsn}&q={question}', headers=headers)
     text = response.text
 
@@ -17,7 +18,7 @@ def search(topic_bsn, question):
     search_results = soup.select('.search-result_article')
 
     parse_result = []
-    for result in search_results:
+    for result in search_results[:top_k]:
         title = result.select_one('.search-result_title').text.strip()
         link = result.select_one('.search-result_title a')['href']
         text = result.select_one('.search-result_text').text.strip()
@@ -37,22 +38,26 @@ def search(topic_bsn, question):
 
     return parse_result
 
-def search_and_save(topic_bsn, question) -> list:
-    search_result = search(topic_bsn, question)
+def search_and_save(topic_bsn, question, top_k=5) -> list:
+    search_result = search(topic_bsn, question, top_k)
     if not search_result:
         print('查無結果')
         return()
     os.makedirs(f'result/{topic_bsn}_{question}', exist_ok=True)
 
-    for i, result in enumerate(tqdm.tqdm(search_result)):
+    threads = []
+    for i, result in enumerate(search_result):
         result_link = result['link']
         # result_title = result['title']
         # result_title = result_title.replace('/', '_')
         # result_title = result_title.replace('\\', '_')
         # result_title = result_title.replace('?', '_')
-        image_urls = crawler_pipeline(result_link, f'result/{topic_bsn}_{question}/{i}')
-        # jina_page = get_jina(result_link)
-        # save_crawler_data(jina_page, f'result/{topic_bsn}_{question}/{i}.md')
+        threads.append(threading.Thread(target = crawler_pipeline, args = (result_link, f'result/{topic_bsn}_{question}/{i}')))
+        threads[-1].start()        
+        # image_urls = crawler_pipeline(result_link, f'result/{topic_bsn}_{question}/{i}')
+
+    for thread in tqdm.tqdm(threads):
+        thread.join()
 
 if __name__ == '__main__':
     topic_bsn = '74934'
