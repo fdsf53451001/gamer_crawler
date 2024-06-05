@@ -51,11 +51,12 @@ def save_crawler_images(image_urls, task_name):
         with open(os.path.join(task_name,f'{i}.jpg'), 'wb') as handler:
             handler.write(response.content)
 
-def crawler_pipeline(page_url, task_name):
+def crawler_pipeline(page_url, task_name) -> list:
     jina_page = get_jina(page_url)
     jina_page, image_urls = clean_images(jina_page)
     save_crawler_data(jina_page, task_name)
     save_crawler_images(image_urls, task_name)
+    return image_urls
 
 if __name__ == '__main__':
     page_url = 'https://forum.gamer.com.tw/C.php?bsn=74934&snA=391'

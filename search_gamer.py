@@ -37,7 +37,7 @@ def search(topic_bsn, question):
 
     return parse_result
 
-def search_and_save(topic_bsn, question):
+def search_and_save(topic_bsn, question) -> list:
     search_result = search(topic_bsn, question)
     if not search_result:
         print('查無結果')
@@ -50,7 +50,7 @@ def search_and_save(topic_bsn, question):
         # result_title = result_title.replace('/', '_')
         # result_title = result_title.replace('\\', '_')
         # result_title = result_title.replace('?', '_')
-        crawler_pipeline(result_link, f'result/{topic_bsn}_{question}/{i}')
+        image_urls = crawler_pipeline(result_link, f'result/{topic_bsn}_{question}/{i}')
         # jina_page = get_jina(result_link)
         # save_crawler_data(jina_page, f'result/{topic_bsn}_{question}/{i}.md')
 
